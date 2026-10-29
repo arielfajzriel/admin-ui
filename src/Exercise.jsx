@@ -1,36 +1,48 @@
-import React from "react";
-import UserCard from "./UserCard";
+import { useState, useEffect } from "react";
+import PostCard from "./PostCard.jsx";
+import { getPosts } from "./Services.js";
 
 function Exercise() {
-  return (
-    <>
-      <div className="min-h-screen bg-gray-100 p-6">
-        <h1 className="text-3xl font-bold text-center mb-6 text-blue-700">
-          User Cards
-        </h1>
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-           <UserCard
-                name="Ahmad"
-                email="ahmad@gmail.com"
-                street="Jl. Imam Bonjol"
-                city="Semarang"
-            />
-            <UserCard
-                name="Fajzriel"
-                email="fajzriel@gmail.com"
-                street="Jl. Indraprasta"
-                city="Ungaran"
-            />
-            <UserCard
-                name="Juliyarso"
-                email="juliyarso@gmail.com"
-                street="Jl. Pemuda"
-                city="Kendal"
-            />
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        const data = await getPosts();
+        setPosts(data);
+      } catch (err) {
+        setError(err.message || "Gagal mengambil data.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPosts();
+  }, []);
+
+  return (
+    <main className="posts-page">
+      <h1>Post Cards</h1>
+
+      {loading && <p className="status">Loading posts...</p>}
+      {error && <p className="status error">{error}</p>}
+
+      {!loading && !error && (
+        <div className="posts-grid">
+          
+        {posts.slice(0, 9).map((post) => (
+          <PostCard
+            key={post.id}
+            title={post.title}
+            body={post.body}
+          />
+        ))}
+
         </div>
-      </div>
-    </>
+      )}
+    </main>
   );
 }
 
